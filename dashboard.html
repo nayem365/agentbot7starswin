@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MobCash Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #070a0d;
+  --surface: #0c1015;
+  --surface2: #111720;
+  --border: #1a2230;
+  --border2: #243040;
+  --gold: #c9a84c;
+  --gold-light: #e8c96a;
+  --gold-dim: rgba(201,168,76,0.12);
+  --text: #dde3ec;
+  --muted: #4a5568;
+  --muted2: #6b7a90;
+  --green: #2dd98f;
+  --green-dim: rgba(45,217,143,0.12);
+  --red: #e05252;
+  --red-dim: rgba(224,82,82,0.12);
+  --yellow: #f5a623;
+  --yellow-dim: rgba(245,166,35,0.12);
+  --blue: #5b9cf6;
+  --blue-dim: rgba(91,156,246,0.12);
+  --sidebar: 260px;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Syne', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: var(--sidebar);
+  min-height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+}
+.sidebar-logo {
+  padding: 28px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.logo-icon {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 16px rgba(201,168,76,0.25);
+  flex-shrink: 0;
+}
+.logo-text { font-size: 18px; font-weight: 800; }
+.logo-text span { color: var(--gold); }
+
+.sidebar-nav { padding: 20px 12px; flex: 1; }
+.nav-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 0 12px; margin-bottom: 8px; font-family: 'DM Mono', monospace; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px; font-weight: 600;
+  color: var(--muted2);
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--gold-dim); color: var(--gold); border-color: rgba(201,168,76,0.2); }
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.badge {
+  margin-left: auto;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-family: 'DM Mono', monospace;
+}
+.badge.gold { background: var(--gold); color: #090c10; }
+
+.sidebar-footer {
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+}
+.logout-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 16px;
+  color: var(--muted2);
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 8px;
+}
+.logout-btn:hover { background: var(--red-dim); color: var(--red); border-color: rgba(224,82,82,0.3); }
+
+/* ── Main ── */
+.main {
+  margin-left: var(--sidebar);
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+}
+.page-title { font-size: 20px; font-weight: 800; }
+.page-title span { color: var(--muted2); font-weight: 400; font-size: 14px; margin-left: 8px; font-family: 'DM Mono', monospace; }
+
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.refresh-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: var(--muted2);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.refresh-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+.admin-chip {
+  background: var(--gold-dim);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px; font-weight: 600;
+  color: var(--gold);
+  font-family: 'DM Mono', monospace;
+}
+
+.content { padding: 32px; flex: 1; }
+
+/* ── Stats cards ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: var(--border2); }
+.stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.stat-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; }
+.stat-icon { font-size: 18px; }
+.stat-value { font-size: 36px; font-weight: 800; line-height: 1; }
+.stat-sub { font-size: 12px; color: var(--muted2); margin-top: 6px; font-family: 'DM Mono', monospace; }
+.stat-card.pending { border-top: 2px solid var(--yellow); }
+.stat-card.approved { border-top: 2px solid var(--green); }
+.stat-card.rejected { border-top: 2px solid var(--red); }
+.stat-card.total { border-top: 2px solid var(--gold); }
+
+/* ── Filter bar ── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.search-wrap {
+  flex: 1;
+  min-width: 220px;
+  position: relative;
+}
+.search-wrap input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 16px 11px 40px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px; color: var(--text);
+  outline: none; transition: border-color 0.2s;
+}
+.search-wrap input:focus { border-color: var(--gold); }
+.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; }
+
+.filter-tabs { display: flex; gap: 6px; }
+.filter-tab {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted2);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'DM Mono', monospace;
+}
+.filter-tab:hover { color: var(--text); border-color: var(--border2); }
+.filter-tab.active { background: var(--gold-dim); border-color: rgba(201,168,76,0.3); color: var(--gold); }
+
+/* ── Table ── */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.table-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.table-title { font-size: 15px; font-weight: 700; }
+.count-chip { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+
+table { width: 100%; border-collapse: collapse; }
+thead tr { border-bottom: 1px solid var(--border); }
+th {
+  padding: 12px 20px;
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--muted); text-align: left;
+  font-family: 'DM Mono', monospace;
+}
+td { padding: 16px 20px; font-size: 13px; border-bottom: 1px solid var(--border); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.1s; cursor: pointer; }
+tbody tr:hover { background: var(--surface2); }
+
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.status-badge.pending { background: var(--yellow-dim); color: var(--yellow); }
+.status-badge.approved { background: var(--green-dim); color: var(--green); }
+.status-badge.rejected { background: var(--red-dim); color: var(--red); }
+
+.name-cell { font-weight: 600; }
+.phone-cell { font-family: 'DM Mono', monospace; color: var(--muted2); }
+.id-cell { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.date-cell { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+
+.action-btns { display: flex; gap: 6px; }
+.btn-sm {
+  padding: 6px 12px;
+  border-radius: 7px;
+  font-size: 11px; font-weight: 700;
+  border: 1px solid;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  transition: all 0.15s;
+}
+.btn-view { background: var(--blue-dim); border-color: rgba(91,156,246,0.3); color: var(--blue); }
+.btn-view:hover { background: rgba(91,156,246,0.2); }
+.btn-approve { background: var(--green-dim); border-color: rgba(45,217,143,0.3); color: var(--green); }
+.btn-approve:hover { background: rgba(45,217,143,0.2); }
+.btn-reject { background: var(--red-dim); border-color: rgba(224,82,82,0.3); color: var(--red); }
+.btn-reject:hover { background: rgba(224,82,82,0.2); }
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  animation: slideUp 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(20px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.modal-head {
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-head h2 { font-size: 18px; font-weight: 800; }
+.close-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--muted2);
+  font-size: 16px; transition: all 0.15s;
+}
+.close-btn:hover { color: var(--red); border-color: rgba(224,82,82,0.3); }
+
+.modal-body { padding: 28px; }
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.info-item label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 4px; display: block; }
+.info-item .val { font-size: 14px; font-weight: 600; }
+.info-item .val.mono { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--muted2); }
+
+.section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; font-family: 'DM Mono', monospace; }
+
+.msg-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.msg-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  resize: vertical;
+  min-height: 90px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 12px;
+}
+.msg-input:focus { border-color: var(--gold); }
+.msg-input::placeholder { color: var(--muted); }
+
+.modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-full {
+  flex: 1; min-width: 120px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.15s;
+}
+.btn-approve-full { background: var(--green-dim); border-color: rgba(45,217,143,0.4); color: var(--green); }
+.btn-approve-full:hover { background: rgba(45,217,143,0.2); }
+.btn-reject-full { background: var(--red-dim); border-color: rgba(224,82,82,0.4); color: var(--red); }
+.btn-reject-full:hover { background: rgba(224,82,82,0.2); }
+.btn-send-full { background: var(--gold-dim); border-color: rgba(201,168,76,0.4); color: var(--gold); }
+.btn-send-full:hover { background: rgba(201,168,76,0.22); }
+
+.toast {
+  position: fixed; bottom: 32px; right: 32px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; gap: 10px;
+  z-index: 999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-color: rgba(45,217,143,0.4); }
+.toast.error { border-color: rgba(224,82,82,0.4); }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">💳</div>
+    <div class="logo-text">Mob<span>Cash</span></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Navigation</div>
+    <div class="nav-item active" onclick="setFilter('all')">
+      <span class="icon">📋</span> All Applications
+      <span class="badge gold" id="nav-total">0</span>
+    </div>
+    <div class="nav-item" onclick="setFilter('pending')">
+      <span class="icon">⏳</span> Pending
+      <span class="badge" id="nav-pending">0</span>
+    </div>
+    <div class="nav-item" onclick="setFilter('approved')">
+      <span class="icon">✅</span> Approved
+    </div>
+    <div class="nav-item" onclick="setFilter('rejected')">
+      <span class="icon">❌</span> Rejected
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="logout-btn" onclick="logout()">
+      <span>⬅️</span> Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <div class="topbar">
+    <div class="page-title">Dashboard <span>// agent applications</span></div>
+    <div class="topbar-right">
+      <button class="refresh-btn" onclick="loadAll()">⟳ Refresh</button>
+      <div class="admin-chip">⬡ ADMIN</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-top"><div class="stat-label">Total</div><div class="stat-icon">📊</div></div>
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-sub">all applications</div>
+      </div>
+      <div class="stat-card pending">
+        <div class="stat-top"><div class="stat-label">Pending</div><div class="stat-icon">⏳</div></div>
+        <div class="stat-value" id="stat-pending">0</div>
+        <div class="stat-sub">awaiting review</div>
+      </div>
+      <div class="stat-card approved">
+        <div class="stat-top"><div class="stat-label">Approved</div><div class="stat-icon">✅</div></div>
+        <div class="stat-value" id="stat-approved">0</div>
+        <div class="stat-sub">active agents</div>
+      </div>
+      <div class="stat-card rejected">
+        <div class="stat-top"><div class="stat-label">Rejected</div><div class="stat-icon">❌</div></div>
+        <div class="stat-value" id="stat-rejected">0</div>
+        <div class="stat-sub">declined</div>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search by name, phone, player ID…" oninput="renderTable()" />
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('all')">All</button>
+        <button class="filter-tab" onclick="setFilter('pending')">Pending</button>
+        <button class="filter-tab" onclick="setFilter('approved')">Approved</button>
+        <button class="filter-tab" onclick="setFilter('rejected')">Rejected</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Applications</div>
+        <div class="count-chip" id="count-chip">— records</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Player ID</th>
+            <th>Currency</th>
+            <th>Status</th>
+            <th>Submitted</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty-state" id="empty-state" style="display:none">
+        <div class="icon">📭</div>
+        <div>No applications found</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h2 id="modal-name">Application Detail</h2>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-grid" id="modal-info"></div>
+
+      <div class="section-title">💬 Send Message to Agent</div>
+      <textarea class="msg-input" id="msg-text" placeholder="Type a message to send to this user via Telegram…"></textarea>
+
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+let allApps = [];
+let currentFilter = 'all';
+let currentChatId = null;
+
+async function loadAll() {
+  try {
+    const [apps, stats] = await Promise.all([
+      fetch('/api/applications').then(r => r.json()),
+      fetch('/api/stats').then(r => r.json())
+    ]);
+    allApps = apps;
+    updateStats(stats);
+    renderTable();
+  } catch(e) {
+    showToast('❌ Failed to load data', 'error');
+  }
+}
+
+function updateStats(s) {
+  document.getElementById('stat-total').textContent = s.total;
+  document.getElementById('stat-pending').textContent = s.pending;
+  document.getElementById('stat-approved').textContent = s.approved;
+  document.getElementById('stat-rejected').textContent = s.rejected;
+  document.getElementById('nav-total').textContent = s.total;
+  document.getElementById('nav-pending').textContent = s.pending;
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+  event && event.target && event.target.classList.add('active');
+  renderTable();
+}
+
+function renderTable() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  let data = allApps;
+
+  if (currentFilter !== 'all') data = data.filter(a => a.status === currentFilter);
+  if (q) data = data.filter(a => {
+    const d = a.data || {};
+    return (d.fullName||'').toLowerCase().includes(q) ||
+           (d.phone||'').includes(q) ||
+           (d.playerId||'').includes(q) ||
+           (a.chatId||'').includes(q);
+  });
+
+  document.getElementById('count-chip').textContent = `${data.length} record${data.length!==1?'s':''}`;
+  const empty = document.getElementById('empty-state');
+  const tbody = document.getElementById('tbody');
+
+  if (data.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = data.map(app => {
+    const d = app.data || {};
+    const date = app.submittedAt ? new Date(app.submittedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'}) : '—';
+    const actionBtns = app.status === 'pending'
+      ? `<button class="btn-sm btn-approve" onclick="quickApprove(event,'${app.chatId}')">Approve</button>
+         <button class="btn-sm btn-reject" onclick="openModal(event,'${app.chatId}')">Reject</button>`
+      : `<button class="btn-sm btn-view" onclick="openModal(event,'${app.chatId}')">View</button>`;
+    return `<tr onclick="openModal(event,'${app.chatId}')">
+      <td class="name-cell">${d.fullName||'—'}</td>
+      <td class="phone-cell">${d.phone||'—'}</td>
+      <td class="id-cell">${d.playerId||'—'}</td>
+      <td>${d.currency||'—'}</td>
+      <td><span class="status-badge ${app.status}">${app.status}</span></td>
+      <td class="date-cell">${date}</td>
+      <td><div class="action-btns" onclick="event.stopPropagation()">${actionBtns}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function quickApprove(e, chatId) {
+  e.stopPropagation();
+  if (!confirm('Approve this application?')) return;
+  await doApprove(chatId);
+}
+
+async function doApprove(chatId) {
+  try {
+    const r = await fetch(`/api/applications/${chatId}/approve`, { method:'POST' });
+    const d = await r.json();
+    if (d.success) { showToast('✅ Application approved!', 'success'); loadAll(); closeModal(); }
+    else showToast('❌ Error: ' + d.error, 'error');
+  } catch { showToast('❌ Network error', 'error'); }
+}
+
+async function doReject(chatId) {
+  const msg = document.getElementById('msg-text').value.trim();
+  if (!msg) return showToast('⚠️ Please enter a rejection reason', 'error');
+  try {
+    const r = await fetch(`/api/applications/${chatId}/reject`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ message: msg })
+    });
+    const d = await r.json();
+    if (d.success) { showToast('❌ Application rejected', 'success'); loadAll(); closeModal(); }
+    else showToast('❌ Error: ' + d.error, 'error');
+  } catch { showToast('❌ Network error', 'error'); }
+}
+
+async function doSendMsg(chatId) {
+  const msg = document.getElementById('msg-text').value.trim();
+  if (!msg) return showToast('⚠️ Please type a message first', 'error');
+  try {
+    const r = await fetch(`/api/applications/${chatId}/message`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ message: msg })
+    });
+    const d = await r.json();
+    if (d.success) { showToast('📤 Message sent!', 'success'); document.getElementById('msg-text').value = ''; }
+    else showToast('❌ Error', 'error');
+  } catch { showToast('❌ Network error', 'error'); }
+}
+
+function openModal(e, chatId) {
+  if (e) e.stopPropagation();
+  const app = allApps.find(a => a.chatId === chatId);
+  if (!app) return;
+  currentChatId = chatId;
+  const d = app.data || {};
+
+  document.getElementById('modal-name').textContent = d.fullName || 'Application Detail';
+  document.getElementById('msg-text').value = '';
+
+  const fields = [
+    ['Full Name', d.fullName],
+    ['Phone', d.phone],
+    ['Player ID', d.playerId],
+    ['Currency', d.currency],
+    ['Top-up Method', d.topup],
+    ['Street', d.street],
+    ['Experience', d.experience],
+    ['Status', `<span class="status-badge ${app.status}">${app.status}</span>`],
+    ['TG Chat ID', chatId],
+    ['Submitted', app.submittedAt ? new Date(app.submittedAt).toLocaleString() : '—'],
+    ['Location', d.location ? `${d.location.latitude?.toFixed(4)}, ${d.location.longitude?.toFixed(4)}` : '—'],
+    ['ID Photos', d.idPhotos ? `${d.idPhotos.length} photo(s)` : 'None'],
+  ];
+
+  document.getElementById('modal-info').innerHTML = fields.map(([l,v]) =>
+    `<div class="info-item"><label>${l}</label><div class="val">${v||'—'}</div></div>`
+  ).join('');
+
+  let btns = '';
+  if (app.status === 'pending') {
+    btns = `
+      <button class="btn-full btn-approve-full" onclick="doApprove('${chatId}')">✅ Approve</button>
+      <button class="btn-full btn-reject-full" onclick="doReject('${chatId}')">❌ Reject with Message</button>
+    `;
+  }
+  btns += `<button class="btn-full btn-send-full" onclick="doSendMsg('${chatId}')">📤 Send Message</button>`;
+  document.getElementById('modal-actions').innerHTML = btns;
+
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal')) return;
+  document.getElementById('modal').classList.remove('open');
+  currentChatId = null;
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+async function logout() {
+  await fetch('/api/logout', { method:'POST' });
+  window.location.href = '/login';
+}
+
+// Auto-refresh every 30s
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>
